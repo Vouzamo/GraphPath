@@ -23,7 +23,7 @@ public class NodeGraph : MonoBehaviour {
 		if(Input.GetKeyUp(KeyCode.Space)) {
 			GenerateGraph();
 
-			List<Queue<Arc>> paths = CalculatePaths(node1, node4, true);
+			List<Queue<Arc>> paths = CalculatePaths(node1, node4, false);
 
 			foreach(var path in paths) {
 				Debug.Log("Path of " + path.Count + " steps");
@@ -105,7 +105,7 @@ public class NodeGraph : MonoBehaviour {
 			path = TryGetPath(source, target, testedNodes, testedArcs);
 			if(path != null) {
 				paths.Add (path);
-				if(!heuristic) {
+				if(heuristic) {
 					break;
 				} else {
 					UpdateTestedArcs(path, testedArcs);
