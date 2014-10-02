@@ -1,12 +1,12 @@
 using UnityEngine;
 
-public class Arc : ScriptableObject {
+public class Arc : MonoBehaviour {
 	
 	private NodeGraph Graph { get; set; }
 	public Node From { get; set; }
 	public Node To { get; set; }
 
-	public float Distance { get { return Vector3.Distance(From.Position,To.Position); } }
+	public float Distance { get { return Vector3.Distance(From.transform.position,To.transform.position); } }
 
 	public void Init(NodeGraph graph, Node from, Node to) {
 		Graph = graph;
@@ -21,7 +21,7 @@ public class Arc : ScriptableObject {
 	
 	// Update is called once per frame
 	void Update () {
-		
+
 	}
 }
 

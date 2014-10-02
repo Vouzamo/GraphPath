@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class NodeGraph : MonoBehaviour {
 
+	public GameObject Node;
+	public GameObject Arc;
+
 	private List<Node> Nodes { get; set; }
 	private List<Arc> Arcs { get; set; }
 
@@ -15,22 +18,36 @@ public class NodeGraph : MonoBehaviour {
 	public NodeGraph () {
 		Nodes = new List<Node>();
 		Arcs = new List<Arc>();
+	}
 
-		//GenerateGraph();
+	public void Start()
+	{
+		GenerateGraph();
 	}
 
 	public void Update() {
 		if(Input.GetKeyUp(KeyCode.Space)) {
-			GenerateGraph();
 
 			List<Queue<Arc>> paths = CalculatePaths(node1, node4, false);
 
 			foreach(var path in paths) {
 				Debug.Log("Path of " + path.Count + " steps");
 				foreach(var arc in path) {
-					Debug.Log("Step from " + arc.From.Position + " to " + arc.To.Position + " at a cost of " + arc.Distance);
+					Debug.Log("Step from " + arc.From.transform.position + " to " + arc.To.transform.position + " at a cost of " + arc.Distance);
 				}
 			}
+		}
+	}
+
+	public void OnDrawGizmos()
+	{
+		foreach(var arc in Arcs)
+		{
+			Gizmos.DrawLine(arc.From.transform.position, arc.To.transform.position);
+		}
+		foreach(var node in Nodes)
+		{
+			Gizmos.DrawSphere(node.transform.position, 0.25f);
 		}
 	}
 
@@ -51,27 +68,39 @@ public class NodeGraph : MonoBehaviour {
 	}
 
 	public void ClearGraph() {
+
+		// Destroy GameObjects
+
 		Nodes.Clear();
 		Arcs.Clear();
 	}
 
     public Node RegisterNode(Vector3 position, float normal)
     {
-		Node node = ScriptableObject.CreateInstance<Node>();
-		node.Init(this, position, normal);
+		GameObject node = (GameObject)Instantiate(Node, position, Quaternion.identity);
+		Node component = node.GetComponent<Node>();
+		component.Init(this);
 
-		Nodes.Add(node);
+		node.transform.parent = this.transform;
 
-		return node;
+		Nodes.Add(component);
+
+		return component;
 	}
 
 	public Arc RegisterArc(Node from, Node to) {
-		Arc arc = ScriptableObject.CreateInstance<Arc>();
-		arc.Init(this, from, to);
+		Vector3 position = (from.transform.position);
+		Quaternion rotation = Quaternion.FromToRotation(Vector3.up, (from.transform.position - to.transform.position));
 
-		Arcs.Add(arc);
+		GameObject arc = (GameObject)Instantiate(Arc, position, rotation);
+		Arc component = arc.GetComponent<Arc>();
+		component.Init(this, from, to);
 
-		return arc;
+		arc.transform.parent = this.transform;
+
+		Arcs.Add(component);
+
+		return component;
 	}
 
 	public Dictionary<Node, float> GetOutboundNeighbours(Node node) {

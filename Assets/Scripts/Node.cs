@@ -1,14 +1,13 @@
 using UnityEngine;
-public class Node : ScriptableObject {
+public class Node : MonoBehaviour {
 
 	private NodeGraph Graph { get; set; }
-	public Vector3 Position { get; set; }
 	public float Normal { get; set; }
+	public bool Enabled { get; set; }
 
-	public void Init(NodeGraph graph, Vector3 position, float normal) {
+	public void Init(NodeGraph graph)
+	{
 		Graph = graph;
-		Position = position;
-		Normal = normal;
 	}
 
 	// Use this for initialization
