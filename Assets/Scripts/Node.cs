@@ -1,9 +1,9 @@
 using UnityEngine;
 public class Node : MonoBehaviour {
 
-	private NodeGraph Graph { get; set; }
-	public float Normal { get; set; }
-	public bool Enabled { get; set; }
+	private NodeGraph Graph;
+	public float Normal;
+	public bool Enabled;
 
 	public void Init(NodeGraph graph)
 	{
@@ -18,6 +18,14 @@ public class Node : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		
+	}
+
+	public void OnDrawGizmos()
+	{
+		if(Enabled)
+		{
+			Gizmos.DrawSphere(transform.position, 0.25f);
+		}
 	}
 }
 

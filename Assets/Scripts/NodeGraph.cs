@@ -6,14 +6,12 @@ public class NodeGraph : MonoBehaviour {
 
 	public GameObject Node;
 	public GameObject Arc;
+	public bool ShowGizmos;
+	public Node From;
+	public Node To;
 
-	private List<Node> Nodes { get; set; }
-	private List<Arc> Arcs { get; set; }
-
-	public Node node1 { get; set; } 
-	public Node node2 { get; set; }
-	public Node node3 { get; set; }
-	public Node node4 { get; set; }
+	private List<Node> Nodes;
+	private List<Arc> Arcs;
 		
 	public NodeGraph () {
 		Nodes = new List<Node>();
@@ -22,49 +20,67 @@ public class NodeGraph : MonoBehaviour {
 
 	public void Start()
 	{
-		GenerateGraph();
+		//GenerateGraph();
+		DetermineGraph();
 	}
 
 	public void Update() {
 		if(Input.GetKeyUp(KeyCode.Space)) {
+			if(From != null && To != null)
+			{
+				List<Queue<Arc>> paths = CalculatePaths(From, To, false);
 
-			List<Queue<Arc>> paths = CalculatePaths(node1, node4, false);
+//				foreach(var path in paths)
+//				{
+//					while(path.Any())
+//					{
+//						Arc arc = path.Dequeue();
+//						Debug.DrawLine(arc.From, arc.To, Color.red, float.MaxValue);
+//					}
+//				}
 
-			foreach(var path in paths) {
-				Debug.Log("Path of " + path.Count + " steps");
-				foreach(var arc in path) {
-					Debug.Log("Step from " + arc.From.transform.position + " to " + arc.To.transform.position + " at a cost of " + arc.Distance);
+				foreach(var path in paths) {
+					Debug.Log("Path of " + path.Count + " steps");
+					foreach(var arc in path) {
+						Debug.Log("Step from " + arc.From.transform.position + " to " + arc.To.transform.position + " at a cost of " + arc.Distance);
+					}
 				}
 			}
 		}
 	}
 
-	public void OnDrawGizmos()
+	public void DetermineGraph()
 	{
-		foreach(var arc in Arcs)
+		ClearGraph();
+
+		foreach(Node node in FindObjectsOfType(typeof(Node)))
 		{
-			Gizmos.DrawLine(arc.From.transform.position, arc.To.transform.position);
+			node.Init(this);
+			Nodes.Add(node);
 		}
-		foreach(var node in Nodes)
+
+		foreach(Arc arc in FindObjectsOfType(typeof(Arc)))
 		{
-			Gizmos.DrawSphere(node.transform.position, 0.25f);
+			arc.Init(this, arc.From, arc.To);
+			Arcs.Add(arc);
 		}
 	}
 
-	public void GenerateGraph() {
+	public void GenerateGraph()
+	{
 		ClearGraph();
 
-		node1 = RegisterNode(new Vector3(0,0,0), 1.0f);
-        node2 = RegisterNode(new Vector3(0,0,1), 1.0f);
-        node3 = RegisterNode(new Vector3(0,1,1), 1.0f);
-        node4 = RegisterNode(new Vector3(0,1,0), 1.0f);
-
-		RegisterArc(node1, node2);
-		RegisterArc(node2, node3);
-		RegisterArc(node3, node4);
-		RegisterArc(node4, node1);
-
-	    RegisterArc(node2, node4);
+//		node1 = RegisterNode(new Vector3(0,0,0), 1.0f);
+//      node2 = RegisterNode(new Vector3(0,0,1), 1.0f);
+//      node3 = RegisterNode(new Vector3(0,1,1), 1.0f);
+//      node4 = RegisterNode(new Vector3(0,1,0), 1.0f);
+//
+//		RegisterArc(node1, node2);
+//		RegisterArc(node2, node3);
+//		RegisterArc(node3, node4);
+//		RegisterArc(node4, node1);
+//
+//	    RegisterArc(node2, node4);
 	}
 
 	public void ClearGraph() {
@@ -78,11 +94,12 @@ public class NodeGraph : MonoBehaviour {
     public Node RegisterNode(Vector3 position, float normal)
     {
 		GameObject node = (GameObject)Instantiate(Node, position, Quaternion.identity);
-		Node component = node.GetComponent<Node>();
-		component.Init(this);
-
+		node.name = "Node " + position;
 		node.transform.parent = this.transform;
 
+		Node component = node.GetComponent<Node>();
+		component.Init(this);
+		
 		Nodes.Add(component);
 
 		return component;
@@ -93,11 +110,12 @@ public class NodeGraph : MonoBehaviour {
 		Quaternion rotation = Quaternion.FromToRotation(Vector3.up, (from.transform.position - to.transform.position));
 
 		GameObject arc = (GameObject)Instantiate(Arc, position, rotation);
-		Arc component = arc.GetComponent<Arc>();
-		component.Init(this, from, to);
-
+		arc.name = "Arc " + from.name + " -> " + to.name;
 		arc.transform.parent = this.transform;
 
+		Arc component = arc.GetComponent<Arc>();
+		component.Init(this, from, to);
+		
 		Arcs.Add(component);
 
 		return component;
