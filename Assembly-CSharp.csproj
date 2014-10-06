@@ -49,6 +49,7 @@
      <Compile Include="Assets\Scripts\Arc.cs" />
      <Compile Include="Assets\Scripts\Node.cs" />
      <Compile Include="Assets\Scripts\NodeGraph.cs" />
+     <Compile Include="Assets\Scripts\Path.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

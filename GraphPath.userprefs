@@ -1,10 +1,11 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\NodeGraph.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Path.cs">
     <Files>
-      <File FileName="Assets\Scripts\Node.cs" Line="4" Column="1" />
-      <File FileName="Assets\Scripts\NodeGraph.cs" Line="2" Column="1" />
-      <File FileName="Assets\Scripts\Arc.cs" Line="14" Column="11" />
+      <File FileName="Assets\Scripts\NodeGraph.cs" Line="52" Column="11" />
+      <File FileName="Assets\Scripts\Node.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Arc.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Path.cs" Line="22" Column="15" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -28,23 +28,29 @@ public class NodeGraph : MonoBehaviour {
 		if(Input.GetKeyUp(KeyCode.Space)) {
 			if(From != null && To != null)
 			{
-				List<Queue<Arc>> paths = CalculatePaths(From, To, false);
+				List<Path> paths = FindPaths(From, To);
+				foreach(Path path in paths)
+				{
+					path.Render();
+				}
+		
+				if(paths.Any())
+				{
+					Stack<Arc> bestPath = paths.OrderBy(x => x.Cost).First().BestPath();
 
-//				foreach(var path in paths)
-//				{
-//					while(path.Any())
-//					{
-//						Arc arc = path.Dequeue();
-//						Debug.DrawLine(arc.From, arc.To, Color.red, float.MaxValue);
-//					}
-//				}
+					Debug.Log ("BEST PATH");
 
-				foreach(var path in paths) {
-					Debug.Log("Path of " + path.Count + " steps");
-					foreach(var arc in path) {
-						Debug.Log("Step from " + arc.From.transform.position + " to " + arc.To.transform.position + " at a cost of " + arc.Distance);
+					while(bestPath.Any())
+					{
+						Arc arc = bestPath.Pop();
+
+						Debug.Log(arc.From + " to " + arc.To + " at a cost of " + arc.Distance);
 					}
 				}
+			}
+			else
+			{
+				Debug.Log("Assign a from and to node!");
 			}
 		}
 	}
@@ -121,92 +127,38 @@ public class NodeGraph : MonoBehaviour {
 		return component;
 	}
 
-	public Dictionary<Node, float> GetOutboundNeighbours(Node node) {
-		List<Node> testedNodes = new List<Node>();
-		List<Arc> testedArcs = new List<Arc>();
-		return GetOutboundNeighbours(node, testedNodes, testedArcs);
-	}
-
-	public Dictionary<Node, float> GetOutboundNeighbours(Node node, List<Node> testedNodes, List<Arc> testedArcs) {
-		Dictionary<Node, float> neighbours = new Dictionary<Node,float>();
-
-		foreach(Arc arc in Arcs.Where(x => x.From == node && !testedNodes.Contains(x.To) && !testedArcs.Contains(x))) {
-			if(!neighbours.ContainsKey(arc.To)) {
-				neighbours.Add(arc.To, arc.Distance);
-			}
-		}
-
-		return neighbours;
-	}
-
-	public List<Queue<Arc>> CalculatePaths(Node source, Node target, bool heuristic)
+	public List<Path> FindPaths(Node fromNode, Node toNode)
 	{
-		List<Queue<Arc>> paths = new List<Queue<Arc>>();
+		return TryGetPath(fromNode, toNode, new List<Arc>());
+	}
 
-		List<Node> testedNodes = new List<Node>();
-		List<Arc> testedArcs = new List<Arc>();
+	public List<Path> TryGetPath(Node fromNode, Node toNode, List<Arc> testedArcs)
+	{
+		List<Path> paths = new List<Path>();
 
-		Queue<Arc> path = new Queue<Arc>();
-		
- 		while(path != null) {
-			path = TryGetPath(source, target, testedNodes, testedArcs);
-			if(path != null) {
-				paths.Add (path);
-				if(heuristic) {
-					break;
-				} else {
-					UpdateTestedArcs(path, testedArcs);
+		// Find all the outbound arcs for the fromNode
+		foreach(Arc arc in Arcs.Where(x => x.From == fromNode && !testedArcs.Contains(x)))
+		{
+			testedArcs.Add(arc);
+
+			Path path = ScriptableObject.CreateInstance<Path>();
+			path.Init(this, arc);
+
+			if(arc.To == toNode)
+			{
+				paths.Add(path);
+			}
+			else
+			{
+				path.ChildPaths = TryGetPath(arc.To, toNode, testedArcs);
+
+				if(path.ChildPaths.Any())
+				{
+					paths.Add(path);
 				}
 			}
 		}
 
 		return paths;
-	}
-
-	private void UpdateTestedArcs(Queue<Arc> path, List<Arc> testedArcs) {
-		Stack<Arc> arcs = new Stack<Arc>();
-		foreach(Arc arc in path) {
-			arcs.Push(arc);
-		}
-		testedArcs.Add(arcs.Pop());
-	}
-
-	public Queue<Arc> TryGetPath(Node source, Node target, List<Node> testedNodes, List<Arc> testedArcs) {
-		Dictionary<Node, float> neighbours = GetOutboundNeighbours(source, testedNodes, testedArcs);
-
-		if(neighbours.Any()) {
-			foreach(KeyValuePair<Node, float> kvp in neighbours.OrderBy(x => x.Value))
-			{
-				Node node = kvp.Key;
-
-				Queue<Arc> path = new Queue<Arc>();
-
-			 	if(node == target)
-				{
-					Arc arc = Arcs.First(x => x.From == source && x.To == node);
-					if(arc != null) {
-						path.Enqueue(arc);
-						return path;
-					}
-					return null;
-				}
-				else {
-					Queue<Arc> subPath = TryGetPath(node, target, testedNodes, testedArcs);
-					if(subPath != null) {
-						path.Enqueue(Arcs.First(x => x.From == source && x.To == node));
-						while(subPath.Any()) {
-							path.Enqueue(subPath.Dequeue());
-						}
-						return path;
-					}
-					else {
-						testedNodes.Add(node);
-					}
-				}
-			}
-			testedNodes.Add(source);
-		}
-
-		return null;
 	}
 }
